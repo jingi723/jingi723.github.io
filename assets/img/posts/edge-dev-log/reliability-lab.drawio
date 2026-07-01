@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="drawio" version="26.0.0">
+  <diagram name="reliability-lab">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1320" pageHeight="560" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="topic" value="Kafka Topic" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="40" y="230" width="140" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="lane" value="Consumer 처리 순서" style="swimlane;startSize=30;whiteSpace=wrap;html=1;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;verticalAlign=top;horizontal=1;" vertex="1" parent="1">
+          <mxGeometry x="260" y="200" width="620" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="p1" value="① 메시지 처리&#xa;(외부 API 호출)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="lane">
+          <mxGeometry x="30" y="55" width="150" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="p2" value="② DB 저장&#xa;(unique constraint)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="lane">
+          <mxGeometry x="230" y="55" width="150" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="p3" value="③ manual&#xa;offset commit" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="lane">
+          <mxGeometry x="430" y="55" width="150" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="dlq" value="DLQ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="70" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="replay" value="Replay Worker&#xa;(재투입)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="180" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="f2" value="장애 A — ② 저장 후 / ③ commit 전 종료&#xa;→ 재처리 시 중복 발생&#xa;idempotent consumer + unique constraint로 방어" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;dashed=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="420" y="410" width="290" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="f3" value="장애 B — ③ commit 후 / ② 저장 실패&#xa;→ 메시지 유실 위험&#xa;commit 위치·순서 전략으로 검증" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;dashed=1;align=center;" vertex="1" parent="1">
+          <mxGeometry x="740" y="410" width="290" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" value="consume" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;" edge="1" parent="1" source="topic" target="lane">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="poison message" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;dashed=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="p1" target="dlq">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="365" y="150" />
+              <mxPoint x="960" y="150" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e3" value="replay" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;fontSize=10;dashed=1;" edge="1" parent="1" source="dlq" target="replay">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;endArrow=none;strokeColor=#d6b656;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="p2" target="f2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;dashed=1;endArrow=none;strokeColor=#b85450;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="p3" target="f3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
