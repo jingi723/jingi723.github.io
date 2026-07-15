@@ -6,16 +6,11 @@ tags: [aws, ecs, fargate, step-functions, eventbridge, python, batch, swm]
 description: 하루치 데이터를 raw에서 canonical까지 처리하는 초기 배치 파이프라인을 만들며 언어와 실행 모델을 고른 과정. 그리고 만들면서 알게 된 runTask.sync의 함정.
 ---
 
-## 이 글의 범위
+## 무엇을 만들고 있었나
 
 edge는 외부에서 뉴스·가격·재무제표·공시를 수집해 분석이 쓸 수 있는 형태로 정규화해야
 한다. 첫 목표는 실시간 수집이 아니었다. **하루에 한 번 실행되고, 정해진 데이터를 처리한
 뒤 종료되는 배치**를 먼저 완성하는 것이었다.
-
-이 글에서는 그 배치의 처리 언어로 Python을, 실행 모델로 ECS Task와 Step Functions를
-고른 과정을 정리한다. 데이터를 어디에 저장할지는 [이전 글](/posts/rdb-vs-s3-data-pipeline/)에
-적었으니 다시 설명하지 않는다. 요약하면 원본과 정제 결과는 S3 레이크에 남고, 이 파이프라인은
-거기까지만 한다.
 
 ## 요구사항
 
@@ -236,6 +231,9 @@ ECS Task          워커의 일회성 실행 환경
 Python 워커        수집 · 파싱 · 정규화
 S3 레이크          raw와 canonical
 ```
+
+파이프라인은 [S3 레이크](/posts/rdb-vs-s3-data-pipeline/)까지만 한다. 분석 엔진이 읽는
+건 RDB인데 그 경계는 이 글 밖이다.
 
 Step Functions에 데이터를 넘기지는 않는다. `run_id`만 넘기고 워커가 레이크에서 직접
 읽는다. 뉴스 본문을 상태 사이로 나르면 payload 제한에 걸리고, 무엇보다 나를 이유가 없다.
