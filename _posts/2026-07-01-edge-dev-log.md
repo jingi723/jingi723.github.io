@@ -1,131 +1,160 @@
 ---
-title: "edge 개발 일지 — 이력서 3줄로 정리한 Kafka 데이터 파이프라인"
+title: "edge 개발 일지 — 이력서 3줄과 거기까지 가는 길"
 date: 2026-07-01 10:00:00 +0900
 categories: [dev-log, data-pipeline]
-tags: [kafka, debezium, outbox-pattern, cdc, idempotent-consumer, swm]
-description: 이벤트 기반 AI 분석 모듈을 MTS에 넣는 B2B SaaS 'edge'. 재처리 가능한 Kafka 수집 파이프라인을 이력서 3줄로 정리하고, 각 줄을 설계 단위로 풀어 기록한다.
+tags: [kafka, sqs, outbox-pattern, idempotent-consumer, swm]
+description: 뉴스 기반 가격 변동 설명을 MTS에 넣는 B2B SaaS 'edge'. 도착지로 잡은 이력서 3줄과, 거기까지 어떤 순서로 갈 것인지를 기록한다.
 ---
 
 ## 프로젝트 소개
 
-- **edge** — 이벤트 기반 AI 분석 모듈을 증권사 MTS에 탑재할 수 있는 형태로 제공하는 B2B SaaS
+- **edge** — 뉴스 기반 가격 변동 설명을 증권사 MTS에 탑재할 수 있는 형태로 제공하는 B2B SaaS
 - **SW마에스트로 17기**
 - 역할: 백엔드 · 데이터 파이프라인 개발 (2026.06~)
 
-이 글은 edge에서 내가 맡은 **데이터 수집 파이프라인**을 "이력서 3줄"로 먼저 압축하고,
-각 줄을 실제 설계 단위로 풀어 기록하는 개발 일지다.
-목표를 먼저 문장으로 못 박고, 진행하면서 채워 나가는 방식으로 적는다.
+이 글은 edge에서 내가 맡은 **데이터 파이프라인**의 도착지를 "이력서 3줄"로 먼저 못 박고,
+거기까지 가는 순서를 적는 인덱스다. 각 단계를 실제로 만들 때마다 글을 하나씩 붙이고,
+여기서 링크한다.
 
-> 아직 구현이 끝난 항목보다 **설계·검증 예정** 항목이 많다. 완료형이 아니라 진행형으로 적는다.
+> 3줄은 전부 **아직 안 만든 것**이다. 완료형이 아니라 목표로 읽어야 한다.
 {: .prompt-info }
 
-## 이력서 3줄
+## 도착지 — 이력서 3줄
 
-1. **Kafka 기반 At-least-once 처리와 Idempotent Consumer를 적용한 금융 데이터 Ingestion Pipeline 구현**
-   — 외부 뉴스·공시 데이터를 Kafka topic으로 수집하고, message key, partition key,
-   manual offset commit, DB unique constraint, idempotent consumer, DLQ/replay를 적용해
-   재처리 상황에서도 동일 데이터가 중복 반영되지 않도록 설계한다.
+1. **Kafka 기반 At-least-once 처리와 Idempotent Consumer를 적용한 금융 데이터 Ingestion Pipeline**
+   — 가격 변동 감지 이벤트를 topic으로 발행하고, message key, partition key, manual offset
+   commit, DB unique constraint, idempotent consumer, DLQ/replay를 적용해 재처리 상황에서도
+   같은 변동이 중복 분석되지 않도록 한다.
 
-2. **Debezium CDC + Outbox Pattern 기반 이벤트 발행 정합성 개선**
-   — 뉴스 원문 저장과 Kafka 이벤트 발행 사이의 dual-write 문제를 줄이기 위해
-   `news_raw`와 `outbox_events`를 하나의 DB transaction으로 저장하고,
-   Debezium CDC를 통해 outbox 변경 이벤트를 Kafka로 발행하는 구조를 구성한다.
+2. **Outbox Pattern 기반 이벤트 발행 정합성 개선**
+   — 가격 변동 사건 저장과 이벤트 발행 사이의 dual-write 문제를 줄이기 위해
+   `price_movement_trigger`와 outbox 테이블을 하나의 DB transaction으로 저장하고,
+   outbox 변경을 이벤트로 발행하는 구조를 만든다.
 
-3. **Kafka Reliability Lab을 통한 장애 상황 재현 및 복구 전략 검증**
-   — worker 강제 종료, DB 저장 후 offset commit 전 장애, 외부 API timeout, poison message,
-   DLQ replay, consumer lag 증가 상황을 재현하고, offset commit 전략과 idempotent consumer의
-   중복·유실 방지 효과를 검증한다.
+3. **Reliability Lab을 통한 장애 상황 재현 및 복구 전략 검증**
+   — worker 강제 종료, 저장 후 커밋 전 장애, 외부 API timeout, poison message, DLQ replay를
+   재현하고, 위 방어 장치들이 실제로 중복·유실을 막는지 검증한다.
 
-아래부터는 이 세 줄을 하나씩 설계 단위로 풀어 적는다.
+## 거기까지 가는 길
 
----
+세 줄 다 도착지다. 이대로 바로 만들면 순서가 거꾸로 된다 — Kafka를 먼저 깔고, 그다음에
+Kafka가 필요한 이유를 찾게 된다. 지금 트리거는 하루 몇 건이라 처리량으로는 정당화되지
+않는다.
 
-## 1. Kafka 기반 금융 데이터 Ingestion Pipeline
+그럼에도 3줄을 목표로 두는 건 **거기서 다루는 문제들이 진짜이기 때문이다.** 중복 분석,
+유실, 발행 정합성은 규모와 무관하게 생긴다. 문제가 진짜면 순서만 제대로 잡으면 된다.
 
-외부 뉴스·공시·시장 데이터는 **중복 수집, worker 장애, 외부 API 실패, 재처리** 상황이
-언제든 발생할 수 있다. 이를 전제로, 수집 데이터를 Kafka topic으로 전달하고
-downstream worker가 비동기적으로 처리하는 구조를 잡았다.
+그래서 각 단계가 **앞 단계에서 생긴 문제** 때문에 필요해지도록 순서를 잡았다.
 
-```
-External Source → Collector → Kafka Topic
-    → Crawling / Parsing Worker → Analysis Request Worker → Analysis Result DB
-    (반복 실패 메시지) → DLQ → Replay Worker → 재투입
-```
+| | 단계 | 무엇이 이걸 필요하게 만드나 |
+| --- | --- | --- |
+| 1 | 배치 기본 흐름 | 일단 하루치가 끝까지 흘러야 한다 |
+| 2 | 감지와 분석 분리 — **SQS** | 감지는 싼데 분석이 비싸다 (누가 큐에 넣는지는 5·6번) |
+| 3 | 멱등성 | 큐가 at-least-once라 같은 게 두 번 온다 |
+| 4 | Retry / DLQ | 실패 메시지가 무한히 재시도된다 |
+| 5 | dual-write 문제 | 저장은 됐는데 발행이 안 됐다 |
+| 6 | Outbox | 5번을 푼다 |
+| 7 | Kafka | SQS로 안 되는 게 드러난 다음에 |
+| 8 | Reliability Lab | 이제 검증할 게 쌓였다 |
 
-핵심은 Kafka 사용 그 자체가 아니라 **재처리 가능한 구조**다. 정리하면 이렇다.
+### 1. 배치 기본 흐름 — 흐름은 깔렸다
 
-- **message key / partition key** 로 처리 순서와 흐름을 제어한다.
-- DB 저장 이후 **manual offset commit** 을 수행한다 — 처리가 끝나기 전에 offset을
-  올리지 않는다.
-- 동일 메시지가 다시 처리되더라도 **DB unique constraint** 와 **idempotent consumer** 로
-  최종 결과가 중복 반영되지 않게 한다.
-- 반복 실패 메시지는 **DLQ** 로 이동시키고, **replay worker** 로 재처리한다.
+하루 한 번 수집해 정규화하는 배치가 끝까지 흐른다. 여기까지는 이벤트도 큐도 없다.
+다만 흐름이 깔린 것이지 안이 다 된 건 아니다 — 다듬을 곳은 아래 글 끝에 적었다.
 
-> "정확히 한 번(exactly-once)"을 애플리케이션에서 직접 보장하기보다,
-> at-least-once로 받아들이고 **idempotency로 중복을 흡수**하는 쪽을 택했다.
+→ [일 배치 파이프라인을 Python 워커와 ECS Task로 시작한 이유](/posts/initial-batch-pipeline/)
+
+### 2. 감지와 분석 분리 — SQS
+
+ETF 가격이 진입 게이트를 통과할 만큼 움직이면 그 사건을 `price_movement_trigger`에
+기록한다. 여기까지는 싸다. 문제는 그 뒤다 — 기여도 분해, 근거 문서 수집, LLM 설명 생성이
+붙는다. 느리고, 돈이 든다.
+
+이 둘을 동기로 묶어두면 LLM이 느릴 때 감지가 밀린다. 떼어내야 하고, 떼려면 큐가 필요하다.
+
+**여기서 Kafka가 아니라 SQS를 쓰려 한다.** 지금 필요한 건 "감지와 분석을 떼는 것"뿐이고,
+그건 SQS가 한다. 하루 몇 건짜리 트리거에 partition도 consumer group도 쓸 데가 없다.
+
+### 3. 멱등성
+
+큐를 넣는 순간 같은 메시지가 두 번 온다. SQS도 Kafka도 at-least-once다. 그런데 이 도메인에서
+중복은 그냥 데이터 오염이 아니라 **돈**이다. 같은 변동을 두 번 분석하면 LLM 비용이 두 배
+나간다.
+
+`price_movement_trigger`에는 이미 `(etf_instrument_id, trade_date, detected_at)` unique
+제약이 걸려 있다. 같은 변동이 두 번 기록되지 않는 지점이 여기다. 소비 쪽에서도 같은
+이벤트를 두 번 받았을 때 결과가 하나로 수렴해야 한다.
+
+> exactly-once를 애플리케이션에서 직접 보장하기보다, at-least-once로 받아들이고
+> **멱등성으로 중복을 흡수**하는 쪽이 현실적이라고 본다.
 {: .prompt-tip }
 
----
+### 4. Retry / DLQ
 
-## 2. Debezium CDC + Outbox Pattern
+실패한 메시지를 그냥 두면 큐 맨 앞에서 무한히 재시도된다. 뒤에 있는 멀쩡한 메시지가 다
+막힌다. 반복 실패는 DLQ로 빼고, 고친 뒤 replay한다. SQS는 이걸 기본으로 준다.
 
-뉴스 원문을 DB에 저장한 뒤 Kafka 이벤트를 **직접 발행**하는 구조에서는,
-DB 저장은 성공했는데 Kafka 발행이 실패하는 **dual-write 문제**가 생긴다.
-반대로 발행만 성공하고 저장이 실패하는 경우도 마찬가지다.
-이 틈을 줄이기 위해 **Transactional Outbox Pattern** 을 적용한다.
+### 5. dual-write 문제
+
+`price_movement_trigger`를 저장하고 이벤트를 발행하는데, 저장은 성공했고 발행이 실패하면?
+변동은 기록됐는데 아무도 분석하지 않는다. 반대로 발행만 성공하고 저장이 실패하면 분석은
+도는데 근거가 되는 사건 기록이 없다.
+
+DB와 큐는 같은 트랜잭션에 못 묶인다. 이 틈은 코드를 조심해서 짠다고 없어지지 않는다.
+
+### 6. Outbox
+
+그래서 사건과 발행 의도를 **같은 트랜잭션**으로 저장한다.
 
 ```
-Collector Server
-    → (1 DB transaction) news_raw + outbox_events 저장
-    → Debezium CDC (outbox_events 변경 캡처)
-    → Kafka Topic → Downstream Worker
+변동 감지
+    → (1 DB transaction) price_movement_trigger + outbox 저장
+    → outbox 변경을 읽어 큐로 발행
+    → Downstream Worker
 ```
 
-- `news_raw` 와 `outbox_events` 를 **하나의 DB transaction** 으로 저장한다.
-  둘 다 커밋되거나, 둘 다 롤백된다.
-- **Debezium CDC** 가 `outbox_events` 테이블의 변경사항을 감지해 Kafka로 전달한다.
+둘 다 커밋되거나 둘 다 롤백된다. 발행은 outbox를 읽어서 별도로 한다.
 
-이렇게 하면 애플리케이션 코드에서 DB write와 Kafka publish를 **동시에 성공시켜야 하는 부담**을
-덜 수 있다. 저장된 데이터와 downstream 이벤트 흐름 사이의 정합성을 구조적으로 끌어올리는 게 목적이다.
+**여기서 갈림길이 있다.** outbox를 읽는 방법이 폴링과 CDC(Debezium) 둘이다. 폴링은
+가볍고 CDC는 Kafka Connect 운영이 따라붙는다. 처음엔 Debezium을 목표로 적었는데, 지금
+규모엔 과해 보인다. 폴링으로 시작해서 폴링의 한계(간격, DB 부하)를 실제로 만나면 그때
+CDC로 넘어가는 게 맞다고 본다. 만나지 않으면 안 넘어간다.
 
----
+### 7. Kafka
 
-## 3. Kafka Reliability Lab
+여기까지 오면 SQS로 안 되는 게 뭔지 보인다. 지금 짐작하는 건 이 정도다.
 
-Kafka Reliability Lab은 edge의 서비스 기능이 아니라,
-**수집 파이프라인의 장애 상황을 재현·검증하기 위한 실험 환경**이다.
-"이렇게 하면 안전하다"를 말로 주장하는 대신, 깨지는 조건을 직접 만들어 확인한다.
+- 지운 메시지는 재생이 안 된다. 과거 이벤트를 다시 흘려야 할 때
+- 같은 이벤트를 소비하는 주체가 둘 이상 될 때
+- 순서를 보장해야 할 때
 
-주요 실험은 다음과 같다.
+이 중 하나가 실제로 걸리면 Kafka로 간다. **하나도 안 걸리면 안 간다.** 그러면 이력서
+1번 줄을 고쳐야 하는데, 그게 더 정직한 줄이라고 생각한다. "Kafka를 썼다"보다 "SQS로
+충분해서 Kafka를 안 썼고, 근거는 이거다"가 낫다.
+
+### 8. Reliability Lab
+
+Lab은 서비스 기능이 아니라 **장애를 재현·검증하는 실험 환경**이다. "이렇게 하면 안전하다"를
+말로 주장하는 대신 깨지는 조건을 직접 만든다.
 
 - worker 처리 중 강제 종료
-- DB 저장 후 offset commit 전 장애
-- offset commit 후 DB 저장 실패
+- DB 저장 후 커밋 전 장애 → 재처리 시 **중복**
+- 커밋 후 DB 저장 실패 → **유실**
 - 외부 API timeout
-- poison message 입력
+- poison message
 - DLQ replay
-- consumer lag 증가
 
-이 실험의 목적은 두 가지다.
+이게 마지막인 이유는 단순하다. **검증할 게 있어야 검증 환경을 만든다.** 3~6번의 방어
+장치가 없는데 Lab부터 지으면 확인할 대상이 없다.
 
-1. **offset commit 위치에 따라** 중복 또는 유실이 발생하는 조건을 눈으로 확인한다.
-   - `② DB 저장` 후 `③ offset commit` 전에 죽으면 → 재처리 시 **중복**
-   - `③ offset commit` 후 `② DB 저장` 이 실패하면 → **유실**
-2. **idempotent consumer, DB unique constraint, DLQ/replay** 구조가 복구에
-   실제로 어떤 역할을 하는지 검증한다.
-
-즉 1번·2번 항목에서 "이렇게 설계했다"고 적은 방어 장치들이,
-실제 장애 상황에서 **정말 중복·유실을 막아 주는지**를 이 Lab에서 반증하듯 확인하는 셈이다.
-
----
+물론 검증은 3번부터 이미 한다. 멱등성을 넣으면 그 자리에서 두 번 넣어보는 게 당연하다.
+여기서 말하는 Lab은 그런 단발 확인이 아니라, 위 실험들을 한 번에 재현하는 **통합 환경**이다.
+그리고 위 목록 중 커밋 순서에 따른 중복·유실은 7번까지 가야 재현할 수 있다.
 
 ## 앞으로
 
-지금은 세 줄 모두 "이렇게 설계한다 / 검증한다"는 **계획에 가깝다**.
-앞으로 dev-log를 이어 가며
+3줄은 목표고, 위 여덟 단계는 거기까지 가는 순서다. 단계를 하나 끝낼 때마다 글을 붙이고
+여기서 링크한다. 다 채워지면 이 글은 목차만 남을 것이다.
 
-- 각 항목의 실제 구현 코드와 설정,
-- Reliability Lab에서 나온 **재현 로그와 수치**,
-- 설계대로 안 됐던 부분과 그 이유
-
-를 채워 넣을 생각이다. 완료된 자랑보다, **막힌 지점과 그때의 판단**을 남기는 걸 우선한다.
+순서가 도중에 바뀔 수도 있다. 7번처럼 아예 안 갈 수도 있다. 그러면 왜 안 갔는지를 적는다.
+완료된 자랑보다 **막힌 지점과 그때의 판단**을 남기는 걸 우선한다.
