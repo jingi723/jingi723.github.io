@@ -4,6 +4,9 @@ date: 2026-07-15 10:00:00 +0900
 categories: [dev-log, data-pipeline]
 tags: [aws, ecs, step-functions, python]
 description: 하루치 데이터를 raw에서 canonical까지 처리하는 초기 배치 파이프라인을 만들며 언어와 실행 모델을 고른 과정. 그리고 만들면서 알게 된 runTask.sync의 함정.
+image:
+  path: /assets/img/posts/initial-batch-pipeline/thumbnail.png
+  alt: 초기 배치 파이프라인의 State Machine — 수집 7개 병렬 후 전량 성공 게이트를 거쳐 정제 4개로
 ---
 
 직전 글에서 저장소를 정했다. RDB 대신 S3 레이크를 쓰고, raw와 canonical로 나눠 쌓기로
