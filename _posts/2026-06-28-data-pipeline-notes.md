@@ -4,6 +4,9 @@ date: 2026-06-28 21:00:00 +0900
 categories: [data-pipeline, 개요]
 tags: [data-pipeline, streaming, backend]     # 태그는 항상 소문자로
 description: 수집·처리·적재 파이프라인을 만들며 마주친 문제와 설계 결정을 기록하는 카테고리.
+image:
+  path: /assets/img/posts/data-pipeline-notes/thumbnail.png
+  alt: 데이터 파이프라인 삽질 노트 썸네일
 ---
 
 ## 이 카테고리에서 다룰 것

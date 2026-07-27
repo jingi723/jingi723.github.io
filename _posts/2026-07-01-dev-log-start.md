@@ -5,6 +5,9 @@ categories: [dev-log, blog]
 tags: [swm, jekyll, chirpy, github-pages]     # 태그는 항상 소문자로
 description: 개발하며 배우고 삽질한 것들을 기록으로 남기기로 했다. 첫 글은 이 블로그를 만든 과정.
 pin: true
+image:
+  path: /assets/img/posts/dev-log-start/thumbnail.png
+  alt: 개발 일지 시작 글 썸네일
 ---
 
 ## 왜 개발 일지인가

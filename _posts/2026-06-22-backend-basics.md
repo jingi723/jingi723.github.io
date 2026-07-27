@@ -4,6 +4,9 @@ date: 2026-06-22 20:00:00 +0900
 categories: [backend, 학습노트]
 tags: [backend, cs, database, network]     # 태그는 항상 소문자로
 description: 안다고 착각했던 백엔드 기초를 다시 정리하는 카테고리. CS 지식과 실무 사이의 간극 메우기.
+image:
+  path: /assets/img/posts/backend-basics/thumbnail.png
+  alt: 백엔드 학습 노트 썸네일 — 다시 기초부터
 ---
 
 ## 왜 다시 기초인가

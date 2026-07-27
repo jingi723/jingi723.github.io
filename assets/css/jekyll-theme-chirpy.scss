@@ -1,7 +1,16 @@
 ---
 ---
 
-@use "main";
+@use 'abstracts/variables' with (
+  $theme: '{{ site.theme_mode }}'
+);
+
+/* prettier-ignore */
+@use 'main
+{%- if jekyll.environment == 'production' -%}
+  .bundle
+{%- endif -%}
+';
 
 /* ============================================================
    Skin — 홈(투페인 빌드로그)과 색·타이포를 맞춘 Chirpy 오버라이드
