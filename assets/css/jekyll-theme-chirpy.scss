@@ -1,0 +1,149 @@
+---
+---
+
+@use "main";
+
+/* ============================================================
+   Skin — 홈(투페인 빌드로그)과 색·타이포를 맞춘 Chirpy 오버라이드
+   내부 페이지(글·About·Archives·Tags)가 홈과 같은 사이트로 읽히게 한다.
+   ============================================================ */
+
+$sans: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+  "Segoe UI", "Malgun Gothic", Roboto, sans-serif;
+$mono: "Geist Mono", "SF Mono", "JetBrains Mono", ui-monospace, Menlo, monospace;
+
+@mixin skin-light {
+  --main-bg: #f4f5f7;
+  --text-color: #3b4048;
+  --text-muted-color: #697079;
+  --heading-color: #15171b;
+  --link-color: #2f6fed;
+  --link-underline-color: #cdd9f7;
+  --sidebar-bg: #ffffff;
+  --sidebar-border-color: #e4e6ea;
+  --sidebar-muted-color: #697079;
+  --sidebar-active-color: #15171b;
+  --sidebar-hover-bg: rgb(47 111 237 / 8%);
+  --topbar-bg: rgb(244 245 247 / 82%);
+  --button-bg: #ffffff;
+  --btn-border-color: #e4e6ea;
+  --tag-bg: #eef1f6;
+  --tag-hover: #dfe6f5;
+}
+
+@mixin skin-dark {
+  --main-bg: #0e1013;
+  --text-color: #bcc1c8;
+  --text-muted-color: #848a94;
+  --heading-color: #e8eaed;
+  --link-color: #5b91ff;
+  --link-underline-color: #29405f;
+  --sidebar-bg: #16191e;
+  --sidebar-border-color: #232830;
+  --sidebar-muted-color: #848a94;
+  --sidebar-active-color: #e8eaed;
+  --sidebar-hover-bg: rgb(91 145 255 / 12%);
+  --topbar-bg: rgb(14 16 19 / 82%);
+  --button-bg: #16191e;
+  --btn-border-color: #232830;
+  --tag-bg: #1b1f27;
+  --tag-hover: #232a35;
+}
+
+:root[data-mode="light"] { @include skin-light; }
+:root[data-mode="dark"]  { @include skin-dark; }
+@media (prefers-color-scheme: light) { :root:not([data-mode="dark"])  { @include skin-light; } }
+@media (prefers-color-scheme: dark)  { :root:not([data-mode="light"]) { @include skin-dark; } }
+
+/* 타이포 — 홈과 같은 계열 */
+html, body { font-family: $sans; }
+h1, h2, h3, h4, h5, h6, .post-content h1, .post-content h2, .post-content h3 { letter-spacing: -.018em; }
+code, pre, kbd, .highlight, tt { font-family: $mono; }
+
+/* 사이드바 사이트명을 홈 아이덴티티(모노)와 맞춤 */
+#sidebar .site-title { font-family: $mono; letter-spacing: -.02em; }
+#sidebar .site-subtitle { color: var(--sidebar-muted-color); }
+
+/* 링크 밑줄을 홈의 슬라이드 밑줄 느낌으로 (본문 내) */
+.content a:not(.img-link):not(.tag) {
+  text-decoration: none;
+  background-image: linear-gradient(var(--link-color), var(--link-color));
+  background-size: 0% 1.5px;
+  background-position: 0 100%;
+  background-repeat: no-repeat;
+  transition: background-size .25s ease;
+  padding-bottom: 1px;
+}
+.content a:not(.img-link):not(.tag):hover { background-size: 100% 1.5px; }
+
+/* ============================================================
+   사이드바를 홈 아이덴티티 판으로 — 내부 페이지에도 같은 좌판
+   ============================================================ */
+#sidebar {
+  align-items: stretch !important;
+  padding: 40px 26px 26px !important;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border-color);
+  text-align: left;
+}
+#sidebar .id-head { margin-bottom: 8px; }
+#sidebar .id-title {
+  font-family: $mono; font-size: 22px; font-weight: 600; letter-spacing: -.025em;
+  color: var(--heading-color); text-decoration: none; display: inline-block;
+}
+#sidebar .id-title .caret { color: var(--link-color); }
+#sidebar .id-role {
+  margin: 12px 0 0; font-size: 13px; line-height: 1.55; color: var(--sidebar-muted-color);
+}
+#sidebar .id-now {
+  margin-top: 16px; display: inline-flex; align-items: center; gap: 8px;
+  font-family: $mono; font-size: 11.5px; color: var(--sidebar-muted-color);
+  background: var(--main-bg); border: 1px solid var(--sidebar-border-color);
+  padding: 6px 11px; border-radius: 999px;
+}
+#sidebar .id-now b { color: var(--heading-color); font-weight: 600; }
+#sidebar .id-now .led {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--link-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--link-color) 20%, transparent);
+  animation: id-blink 2.6s infinite;
+}
+@keyframes id-blink { 0%, 100% { opacity: 1; } 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) { #sidebar .id-now .led { animation: none; } }
+
+#sidebar .id-index { margin-top: 34px; }
+#sidebar .idx-h {
+  font-family: $mono; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--text-muted-color); opacity: .8; margin-bottom: 8px;
+}
+#sidebar .idx {
+  display: grid; grid-template-columns: 16px 1fr auto; align-items: center; gap: 11px;
+  padding: 8px 0; font-size: 13.5px; color: var(--sidebar-muted-color);
+  text-decoration: none; transition: color .15s; background: none;
+}
+#sidebar .idx .ic { width: 15px; height: 15px; color: var(--text-muted-color); opacity: .7; transition: .15s; }
+#sidebar .idx .nm { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#sidebar .idx .c { font-family: $mono; font-size: 11.5px; color: var(--text-muted-color); opacity: .7; }
+#sidebar .idx:hover, #sidebar .idx.on { color: var(--sidebar-active-color); }
+#sidebar .idx:hover .ic, #sidebar .idx.on .ic { color: var(--link-color); opacity: 1; }
+#sidebar .idx.on .c { color: var(--link-color); opacity: 1; }
+
+#sidebar .idx-sub {
+  margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--sidebar-border-color);
+  display: flex; flex-direction: column; gap: 2px;
+}
+#sidebar .idx-sub a {
+  font-family: $mono; font-size: 12.5px; color: var(--text-muted-color); text-decoration: none;
+  padding: 6px 0; display: flex; align-items: center; gap: 10px; transition: color .15s;
+}
+#sidebar .idx-sub a i { width: 15px; opacity: .7; }
+#sidebar .idx-sub a:hover, #sidebar .idx-sub a.on { color: var(--link-color); }
+
+#sidebar .id-bottom {
+  margin-top: auto; padding-top: 22px; border-top: 1px solid var(--sidebar-border-color);
+  justify-content: space-between; gap: 10px;
+}
+#sidebar .id-bottom #mode-toggle { color: var(--sidebar-muted-color); padding: 0; font-size: 15px; }
+#sidebar .id-bottom #mode-toggle:hover { color: var(--link-color); }
+#sidebar .id-soc { display: flex; gap: 14px; }
+#sidebar .id-soc a { color: var(--sidebar-muted-color); font-size: 15px; transition: color .15s; }
+#sidebar .id-soc a:hover { color: var(--link-color); }

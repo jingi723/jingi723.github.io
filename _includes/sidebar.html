@@ -1,0 +1,52 @@
+<!-- Sidebar override — 홈과 같은 아이덴티티 판. #sidebar id는 유지(모바일 토글 훅). -->
+{% assign lang = site.lang | default: 'en' %}
+<aside aria-label="Sidebar" id="sidebar" class="d-flex flex-column">
+  <header class="id-head">
+    <a class="id-title" href="{{ '/' | relative_url }}"><span class="caret">~/</span>{{ site.title }}</a>
+    <p class="id-role">{{ site.tagline }}</p>
+    <span class="id-now"><span class="led"></span>지금 만드는 것 <b>edge</b></span>
+  </header>
+
+  <nav class="id-index flex-grow-1 w-100">
+    <div class="idx-h">Index</div>
+    <a class="idx{% if page.layout == 'home' %} on{% endif %}" href="{{ '/' | relative_url }}">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      <span class="nm">전체</span><span class="c">{{ site.posts.size }}</span>
+    </a>
+    {%- assign groups = site.posts | group_by_exp: "p", "p.categories.first" %}
+    {%- for g in groups %}
+    {%- assign meta = site.data.categories[g.name] %}
+    <a class="idx{% if page.title == g.name %} on{% endif %}" href="{{ '/categories/' | append: g.name | append: '/' | relative_url }}">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="{{ meta.icon | default: 'M12 2v20M2 12h20' }}"/></svg>
+      <span class="nm">{{ meta.ko | default: g.name }}</span><span class="c">{{ g.items.size }}</span>
+    </a>
+    {%- endfor %}
+    <div class="idx-sub">
+      {%- for tab in site.tabs %}
+      <a href="{{ tab.url | relative_url }}"{% if tab.url == page.url %} class="on"{% endif %}><i class="fa-fw {{ tab.icon }}"></i>{{ tab.title }}</a>
+      {%- endfor %}
+    </div>
+  </nav>
+
+  <div class="id-bottom d-flex align-items-center w-100">
+    {% unless site.theme_mode == 'light' or site.theme_mode == 'dark' %}
+      {%- capture icon_system -%}<i class="fa-solid fa-display" data-theme-mode="system"></i>{%- endcapture -%}
+      {%- capture icon_light -%}<i class="fa-regular fa-sun" data-theme-mode="light"></i>{%- endcapture -%}
+      {%- capture icon_dark -%}<i class="fa-regular fa-moon" data-theme-mode="dark"></i>{%- endcapture -%}
+      <div class="btn-group dropup">
+        <button type="button" class="btn btn-link nav-link" aria-label="Switch Mode" id="mode-toggle" data-bs-toggle="dropdown">
+          {{- icon_light -}}{{- icon_dark -}}{{- icon_system -}}
+        </button>
+        <ul class="dropdown-menu rounded-3 mb-1 p-1">
+          <li><button class="dropdown-item d-flex align-items-center" type="button" data-theme-mode="light">{{- icon_light -}}라이트</button></li>
+          <li><button class="dropdown-item d-flex align-items-center" type="button" data-theme-mode="dark">{{- icon_dark -}}다크</button></li>
+          <li><button class="dropdown-item d-flex align-items-center" type="button" data-theme-mode="system">{{- icon_system -}}시스템</button></li>
+        </ul>
+      </div>
+    {% endunless %}
+    <div class="id-soc">
+      {%- if site.github.username %}<a href="https://github.com/{{ site.github.username }}" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>{%- endif %}
+      <a href="{{ '/feed.xml' | relative_url }}" aria-label="RSS"><i class="fa-solid fa-rss"></i></a>
+    </div>
+  </div>
+</aside>

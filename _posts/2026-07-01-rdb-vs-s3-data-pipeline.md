@@ -4,6 +4,9 @@ date: 2026-07-01 11:00:00 +0900
 categories: [data-pipeline, 설계]
 tags: [data-pipeline, s3, rdb, olap, oltp, etl, elt, data-lake]     # 태그는 항상 소문자로
 description: 수집한 데이터를 전부 RDB에 넣던 습관을 멘토님 피드백으로 다시 본 기록. 저장소는 "편한 곳"이 아니라 "데이터의 역할"로 정한다.
+image:
+  path: /assets/img/posts/rdb-vs-s3-data-pipeline/thumbnail.png
+  alt: 데이터의 역할에 따라 RDB와 S3 레이크로 저장소를 나누는 결정 흐름
 ---
 
 ## 발단, 문제 인식
