@@ -156,3 +156,7 @@ code, pre, kbd, .highlight, tt { font-family: $mono; }
 #sidebar .id-soc { display: flex; gap: 14px; }
 #sidebar .id-soc a { color: var(--sidebar-muted-color); font-size: 15px; transition: color .15s; }
 #sidebar .id-soc a:hover { color: var(--link-color); }
+
+/* 포스트 상단 히어로 썸네일을 3:2로 — 3:2 이미지가 crop 없이 딱 맞는다.
+   홈 카드(#post-list)는 기본 40:21 그대로 둔다. */
+article[data-toc] .preview-img { aspect-ratio: 3 / 2; }
