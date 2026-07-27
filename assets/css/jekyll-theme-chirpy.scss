@@ -59,10 +59,10 @@ $mono: "Geist Mono", "SF Mono", "JetBrains Mono", ui-monospace, Menlo, monospace
   --tag-hover: #232a35;
 }
 
-:root[data-mode="light"] { @include skin-light; }
-:root[data-mode="dark"]  { @include skin-dark; }
-@media (prefers-color-scheme: light) { :root:not([data-mode="dark"])  { @include skin-light; } }
-@media (prefers-color-scheme: dark)  { :root:not([data-mode="light"]) { @include skin-dark; } }
+:root[data-bs-theme="light"] { @include skin-light; }
+:root[data-bs-theme="dark"]  { @include skin-dark; }
+@media (prefers-color-scheme: light) { :root:not([data-bs-theme="dark"])  { @include skin-light; } }
+@media (prefers-color-scheme: dark)  { :root:not([data-bs-theme="light"]) { @include skin-dark; } }
 
 /* 타이포 — 홈과 같은 계열 */
 html, body { font-family: $sans; }
