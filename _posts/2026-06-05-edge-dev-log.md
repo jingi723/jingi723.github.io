@@ -1,6 +1,6 @@
 ---
 title: "edge 개발 일지 — 이력서 3줄과 거기까지 가는 길"
-date: 2026-07-01 10:00:00 +0900
+date: 2026-06-05 10:00:00 +0900
 categories: [dev-log, data-pipeline]
 tags: [kafka, sqs, outbox-pattern, idempotent-consumer, swm]
 description: 뉴스 기반 가격 변동 설명을 MTS에 넣는 B2B SaaS 'edge'. 도착지로 잡은 이력서 3줄과, 거기까지 어떤 순서로 갈 것인지를 기록한다.
