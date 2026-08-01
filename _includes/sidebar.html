@@ -16,7 +16,7 @@
     {%- assign groups = site.posts | group_by_exp: "p", "p.categories.first" %}
     {%- for g in groups %}
     {%- assign meta = site.data.categories[g.name] %}
-    <a class="idx{% if page.title == g.name %} on{% endif %}" href="{{ '/categories/' | append: g.name | append: '/' | relative_url }}">
+    <a class="idx{% if page.title == g.name %} on{% endif %}" href="{{ g.name | slugify | url_encode | prepend: '/categories/' | append: '/' | relative_url }}">
       <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="{{ meta.icon | default: 'M12 2v20M2 12h20' }}"/></svg>
       <span class="nm">{{ meta.ko | default: g.name }}</span><span class="c">{{ g.items.size }}</span>
     </a>
