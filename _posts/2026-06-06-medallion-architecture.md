@@ -1,11 +1,10 @@
 ---
 title: "메달리온 아키텍처 — Bronze·Silver·Gold가 실제로 나누는 것"
-date: 2026-06-03 11:00:00 +0900
-categories: [데이터 엔지니어링, 데이터 아키텍처]
+date: 2026-06-06 20:00:00 +0900
+categories: [dev-log, data-pipeline]
 tags: [data-engineering, medallion-architecture, data-lakehouse, data-modeling]
 image:
   path: /assets/img/posts/medallion-architecture/thumbnail.webp
-  alt: Bronze·Silver·Gold 세 계층이 각각 다음 계층에 무엇을 보장하는지 보여주는 개념도
 ---
 
 데이터 파이프라인 자료를 보다 보면 Bronze, Silver, Gold라는 말이 자꾸 나왔다. medallion이라는 단어도 어디서든 당연하다는 듯이 쓰였다.

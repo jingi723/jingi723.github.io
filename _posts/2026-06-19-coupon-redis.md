@@ -1,11 +1,10 @@
 ---
 title: "선착순 쿠폰 발급과 Redis"
-date: 2026-08-17 12:00:00 +0900
+date: 2026-06-19 21:00:00 +0900
 categories: [dev-log, 백엔드]
 tags: [redis, k6, load-testing, concurrency]
 image:
   path: /assets/img/posts/coupon-redis/thumbnail.webp
-  alt: 선착순 쿠폰 발급 요청이 Before에서는 전부 DB로, After에서는 거절이 Redis에서 걸러지는 흐름 대비
 ---
 
 선착순 쿠폰 발급의 정합성은 이미 DB로 닫아둔 상태였다. 조건부 atomic UPDATE와 `(coupon_id, user_id)` unique constraint를 걸어서, 재고가 100개면 아무리 몰려도 정확히 100개만 발급된다. 전체 코드는 [공개 저장소](https://github.com/jingi723/coupon-system)에 있다.

@@ -5,7 +5,6 @@ categories: [dev-log, data-pipeline]
 tags: [krx, data-pipeline, session-auth, web-scraping]
 image:
   path: /assets/img/posts/etf-holdings/thumbnail.webp
-  alt: KRX ETF 구성종목이 로그인 게이트 뒤에 있어 로그인해서 여는 구조
 ---
 
 국내 ETF의 가격이 왜 움직였는지 설명하려면, 먼저 그 ETF가 어떤 종목을 담고 있는지부터 알아야 했다. ETF는 종목 하나가 아니라 수십에서 수백 개를 담은 바구니라서, 바구니가 오른 이유를 말하려면 안에 뭐가 몇 퍼센트씩 들었는지를 알아야 한다.

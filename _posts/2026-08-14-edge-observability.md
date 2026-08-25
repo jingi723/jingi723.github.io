@@ -1,11 +1,10 @@
 ---
 title: "전부 PUBLISHED인데 처리된 건 하나도 없었다 — 발행 성공을 업무 완료로 세지 않는 관측 설계"
-date: 2026-08-17 06:40:00 +0900
+date: 2026-08-14 20:00:00 +0900
 categories: [dev-log, data-pipeline]
 tags: [edge, observability, spring-boot, aws]
 image:
   path: /assets/img/posts/edge-observability/thumbnail.webp
-  alt: PUBLISHED 도장이 찍힌 초록 상자들이 컨베이어 끝에 65개 쌓여 있고, 그 상자를 집어갈 작업자 자리가 비어 처리 결과가 0인 손그림
 ---
 
 직전 작업에서 장중 파이프라인의 dual-write를 outbox로 닫았다. 워커는 DB에 job과 발행 의도를 남기고, 발행은 별도 Relay가 `NEW` event를 SQS로 보내며 `PUBLISHED`로 바꿨다. 그때까지 발행 유실은 0이었다.

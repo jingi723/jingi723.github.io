@@ -6,7 +6,6 @@ tags: [kafka, sqs, outbox-pattern, idempotent-consumer, swm]
 description: 뉴스 기반 가격 변동 설명을 MTS에 넣는 B2B SaaS 'edge'. 도착지로 잡은 이력서 3줄과, 거기까지 어떤 순서로 갈 것인지를 기록한다.
 image:
   path: /assets/img/posts/edge-dev-log/thumbnail.png
-  alt: edge 개발 일지 썸네일 — 이력서 3줄까지 가는 길
 ---
 
 ## 프로젝트 소개

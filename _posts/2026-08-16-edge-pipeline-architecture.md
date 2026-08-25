@@ -1,11 +1,10 @@
 ---
 title: "EDGE 데이터 파이프라인 아키텍처"
-date: 2026-08-17 08:02:00 +0900
+date: 2026-08-16 20:00:00 +0900
 categories: [dev-log, data-pipeline]
 tags: [edge, data-pipeline, architecture, aws]
 image:
   path: /assets/img/posts/edge-pipeline-architecture/thumbnail.webp
-  alt: 화이트보드에 손으로 그린 다섯 칸짜리 내려가는 계단, 맨 윗단은 1 DAY, 맨 아랫단은 빨간 원으로 표시된 60 SEC이고 각 단에 박스·갈라지는 화살표·큐·시계·네 줄 레인 아이콘이 그려져 있다
 ---
 
 지금 이 파이프라인은 장이 열려 있는 동안 1분마다 돈다. 장전에 그날의 세션을 계획하는 task가 있고, 장중 내내 살아 있는 worker가 있고, 무엇을 계획했고 무엇이 실제로 끝났는지를 적는 원장이 있다.

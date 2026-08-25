@@ -7,7 +7,6 @@ description: 결정은 쌓이는데 그걸 왜 그렇게 정했는지는 어디�
 pin: true
 image:
   path: /assets/img/posts/dev-log-start/thumbnail.png
-  alt: 코드에는 결정만 남고 이유는 사라지는 걸 붙잡으려고 시작한 개발 블로그
 ---
 
 데이터 파이프라인을 맡으면서 결정이 계속 쌓였다. 매일 한 번 도는 배치 하나 만드는

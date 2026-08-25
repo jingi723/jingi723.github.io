@@ -1,11 +1,10 @@
 ---
 title: "프로세스를 100번 죽이고 메시지를 200번 중복 전달해도 유실 0·중복 실행 0 — 장중 파이프라인 dual-write 닫기"
-date: 2026-08-17 05:50:00 +0900
+date: 2026-08-02 20:00:00 +0900
 categories: [dev-log, data-pipeline]
 tags: [edge, transactional-outbox, postgresql, idempotency]
 image:
   path: /assets/img/posts/edge-outbox/thumbnail.webp
-  alt: 작업과 발행 의도를 한 PostgreSQL 트랜잭션에 묶고 별도 Relay만 SQS로 발행하는 Outbox 구조
 ---
 
 장중 파이프라인의 수집은 60초 window 안에 끝나야 했다. 느리고 실패할 수 있는 후속 처리까지 그 한 줄에 묶어둘 수는 없었다.

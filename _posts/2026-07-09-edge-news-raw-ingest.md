@@ -1,11 +1,10 @@
 ---
 title: "뉴스 수집기 구현 — 두 소스를 하나의 raw 적재 스텝으로"
-date: 2026-08-15 10:00:00 +0900
+date: 2026-07-09 20:00:00 +0900
 categories: [dev-log, data-pipeline]
 tags: [edge, data-pipeline, raw-zone, fail-loud]
 image:
   path: /assets/img/posts/edge-news-raw-ingest/thumbnail.webp
-  alt: 두 뉴스 소스가 한 수집 스텝을 통과해 raw 존과 collection_log로 갈라지는 흐름
 ---
 
 지난 글에서 파이프라인의 오케스트레이션까지 잡아 뒀다. Python 워커가 ECS Task로 돌고, 그 위를 Step Functions가 묶는 구조다. 이제 그 워커 안에서 도는 첫 스텝 차례였다 — 뉴스 원본을 raw 존에 적재하는 일이다.

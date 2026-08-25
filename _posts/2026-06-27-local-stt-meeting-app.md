@@ -1,11 +1,10 @@
 ---
 title: "실습은 mp3 하나로 끝났지만, 나는 회의를 녹음하고 싶었다 — 멘토링 STT 특강을 macOS 앱으로"
 date: 2026-06-27 09:00:00 +0900
-categories: [AI, STT]
+categories: [dev-log, AI]
 tags: [stt, macos, context-biasing, pyannote]
 image:
   path: /assets/img/posts/local-stt-meeting-app/thumbnail.webp
-  alt: 마이크로 mp3 하나를 전사하던 강의 실습과, 시스템 소리를 통째로 녹음해 전사하는 macOS 앱을 나란히 대비한 썸네일
 ---
 
 멘토님 STT 특강을 들었다. 실습은 미리 준비된 mp3 파일 하나를 노트북 셀에서 전사하는 데까지였고, 녹음은 Obsidian 마이크로 **30초에서 2분**을 잡는 게 전부였다.

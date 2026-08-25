@@ -1,11 +1,10 @@
 ---
 title: "그라파나는 데이터를 하나도 저장하지 않는다 — 프로메테우스·그라파나 역할 분담 정리"
-date: 2026-08-01 15:00:00 +0900
-categories: [인프라, 모니터링]
+date: 2026-07-27 20:00:00 +0900
+categories: [dev-log, 인프라]
 tags: [prometheus, grafana, monitoring, promql]
 image:
   path: /assets/img/posts/prometheus-grafana-roles/thumbnail.webp
-  alt: 프로메테우스가 지표를 긁어 저장하고 그라파나는 그것을 그리기만 하는 역할 분담
 ---
 
 모니터링을 붙여야 할 일이 생겼다. 검색하면 늘 프로메테우스와 그라파나가 세트로 나온다. 둘을 같이 깔라는 글은 많은데, 정작 뭐가 뭘 하는지 경계가 안 잡혔다.

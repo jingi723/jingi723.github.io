@@ -6,7 +6,6 @@ tags: [aws, ecs, step-functions, python]
 description: 하루치 데이터를 raw에서 canonical까지 처리하는 초기 배치 파이프라인을 만들며 언어·실행 모델·오케스트레이션을 고른 과정.
 image:
   path: /assets/img/posts/initial-batch-pipeline/thumbnail.png
-  alt: 초기 배치 파이프라인의 State Machine — 수집 4개 병렬 후 전량 성공 게이트를 거쳐 정제 4개로
 ---
 
 직전 글에서 저장소를 정했다. RDB 대신 S3 레이크를 쓰고, raw와 canonical로 나눠 쌓기로
