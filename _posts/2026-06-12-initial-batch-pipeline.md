@@ -1,7 +1,7 @@
 ---
 title: "일 배치를 Python 워커와 ECS Task로 시작한 이유 — 언어·실행 모델·오케스트레이션 결정 기록"
 date: 2026-06-12 10:00:00 +0900
-categories: [dev-log, data-pipeline]
+categories: [data-pipeline, 수집]
 tags: [aws, ecs, step-functions, python]
 description: 하루치 데이터를 raw에서 canonical까지 처리하는 초기 배치 파이프라인을 만들며 언어·실행 모델·오케스트레이션을 고른 과정.
 image:

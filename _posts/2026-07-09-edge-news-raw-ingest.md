@@ -1,7 +1,7 @@
 ---
 title: "뉴스 수집기 구현 — 두 소스를 하나의 raw 적재 스텝으로"
 date: 2026-07-09 20:00:00 +0900
-categories: [dev-log, data-pipeline]
+categories: [data-pipeline, 수집]
 tags: [edge, data-pipeline, raw-zone, fail-loud]
 image:
   path: /assets/img/posts/edge-news-raw-ingest/thumbnail.webp

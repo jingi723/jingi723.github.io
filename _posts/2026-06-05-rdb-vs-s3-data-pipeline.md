@@ -1,7 +1,7 @@
 ---
 title: "다시 처리할 데이터인가, 바로 소비할 데이터인가 — RDB와 S3를 나누는 기준"
 date: 2026-06-05 11:00:00 +0900
-categories: [dev-log, data-pipeline]
+categories: [data-pipeline, 설계]
 tags: [data-pipeline, s3, rdb, data-lake]     # 태그는 항상 소문자로
 description: 수집한 데이터를 전부 RDB에 두던 습관을 멘토님 피드백으로 다시 본 기록. 저장소는 "편한 곳"이 아니라 "데이터의 역할"로 정한다.
 image:

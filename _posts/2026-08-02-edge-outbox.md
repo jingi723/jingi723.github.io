@@ -1,7 +1,7 @@
 ---
 title: "프로세스를 100번 죽이고 메시지를 200번 중복 전달해도 유실 0·중복 실행 0 — 장중 파이프라인 dual-write 닫기"
 date: 2026-08-02 20:00:00 +0900
-categories: [dev-log, data-pipeline]
+categories: [data-pipeline, 신뢰성]
 tags: [edge, transactional-outbox, postgresql, idempotency]
 image:
   path: /assets/img/posts/edge-outbox/thumbnail.webp

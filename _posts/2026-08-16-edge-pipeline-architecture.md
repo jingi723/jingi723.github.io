@@ -1,7 +1,7 @@
 ---
 title: "EDGE 데이터 파이프라인 아키텍처"
 date: 2026-08-16 20:00:00 +0900
-categories: [dev-log, data-pipeline]
+categories: [data-pipeline, 설계]
 tags: [edge, data-pipeline, architecture, aws]
 image:
   path: /assets/img/posts/edge-pipeline-architecture/thumbnail.webp

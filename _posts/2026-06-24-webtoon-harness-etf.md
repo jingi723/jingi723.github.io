@@ -1,7 +1,7 @@
 ---
 title: "웹툰 하네스를 분석해 ETF 발굴 하네스를 만들었다 — 에이전트·스킬 구성 차용기"
 date: 2026-06-24 21:00:00 +0900
-categories: [dev-log, AI]
+categories: [AI, 하네스]
 tags: [claude-code, multi-agent, harness, ai-tools]
 description: 웹툰 하네스(revfactory/webtoon-harness)의 에이전트·스킬 구성을 분석해 ETF 발굴 하네스를 만든 기록. 하향식 발굴과 상향식 검증 파이프라인까지.
 image:

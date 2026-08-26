@@ -1,7 +1,7 @@
 ---
 title: "전부 PUBLISHED인데 처리된 건 하나도 없었다 — 발행 성공을 업무 완료로 세지 않는 관측 설계"
 date: 2026-08-14 20:00:00 +0900
-categories: [dev-log, data-pipeline]
+categories: [data-pipeline, 관측]
 tags: [edge, observability, spring-boot, aws]
 image:
   path: /assets/img/posts/edge-observability/thumbnail.webp

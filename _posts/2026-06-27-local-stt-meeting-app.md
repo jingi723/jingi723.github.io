@@ -1,7 +1,7 @@
 ---
 title: "실습은 mp3 하나로 끝났지만, 나는 회의를 녹음하고 싶었다 — 멘토링 STT 특강을 macOS 앱으로"
 date: 2026-06-27 09:00:00 +0900
-categories: [dev-log, AI]
+categories: [AI, STT]
 tags: [stt, macos, context-biasing, pyannote]
 image:
   path: /assets/img/posts/local-stt-meeting-app/thumbnail.webp

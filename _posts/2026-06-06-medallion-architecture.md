@@ -1,7 +1,7 @@
 ---
 title: "메달리온 아키텍처 — Bronze·Silver·Gold가 실제로 나누는 것"
 date: 2026-06-06 20:00:00 +0900
-categories: [dev-log, data-pipeline]
+categories: [data-pipeline, 설계]
 tags: [data-engineering, medallion-architecture, data-lakehouse, data-modeling]
 image:
   path: /assets/img/posts/medallion-architecture/thumbnail.webp

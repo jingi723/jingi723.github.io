@@ -1,7 +1,7 @@
 ---
 title: "공식 API엔 없어서, 로그인해서 긁었다 — KR ETF 구성종목 수집"
 date: 2026-06-16 21:00:00 +0900
-categories: [dev-log, data-pipeline]
+categories: [data-pipeline, 수집]
 tags: [krx, data-pipeline, session-auth, web-scraping]
 image:
   path: /assets/img/posts/etf-holdings/thumbnail.webp

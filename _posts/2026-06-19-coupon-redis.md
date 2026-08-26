@@ -1,7 +1,7 @@
 ---
 title: "선착순 쿠폰 발급과 Redis"
 date: 2026-06-19 21:00:00 +0900
-categories: [dev-log, 백엔드]
+categories: [백엔드, 동시성]
 tags: [redis, k6, load-testing, concurrency]
 image:
   path: /assets/img/posts/coupon-redis/thumbnail.webp
