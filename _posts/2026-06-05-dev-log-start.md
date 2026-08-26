@@ -1,6 +1,7 @@
 ---
 title: "코드는 남는데 왜 그렇게 했는지는 안 남았다"
 date: 2026-06-05 09:00:00 +0900
+categories: [기타]
 tags: [dev-log, blog, swm, backend]     # 태그는 항상 소문자로
 description: 결정은 쌓이는데 그걸 왜 그렇게 정했는지는 어디에도 안 남았다. 그 이유를 남겨두려고 블로그를 시작한다.
 pin: true
