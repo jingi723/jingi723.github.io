@@ -1,7 +1,7 @@
 ---
 title: "그라파나는 데이터를 하나도 저장하지 않는다 — 프로메테우스·그라파나 역할 분담 정리"
 date: 2026-07-27 20:00:00 +0900
-categories: [인프라, 모니터링]
+categories: [data-pipeline, 관측]
 tags: [prometheus, grafana, monitoring, promql]
 image:
   path: /assets/img/posts/prometheus-grafana-roles/thumbnail.webp
