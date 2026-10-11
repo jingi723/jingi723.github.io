@@ -41,7 +41,7 @@ _LLM을 기다리는 동안 DB 연결은 닫고, 실행 슬롯은 별도로 유�
 
 ## 결과 발행 트랜잭션에서 슬롯이 남아 있는지 확인했다 {#publication-ownership}
 
-분석 결과를 저장하는 `PublicationStore`는 이미 완료된 분석이면 저장된 결과를 반환한다. 새로 발행해야 한다면 같은 트랜잭션 안에서 자신의 실행 ARN으로 슬롯 행을 조회한다. 핵심 SQL은 짧다.
+분석 결과를 저장하는 [PublicationStore](https://github.com/alphaeveryday/edge/pull/1112)는 이미 완료된 분석이면 저장된 결과를 반환한다. 새로 발행해야 한다면 같은 트랜잭션 안에서 자신의 실행 ARN으로 슬롯 행을 조회한다. 핵심 SQL은 짧다.
 
 ```sql
 SELECT 1
@@ -97,7 +97,7 @@ _슬롯 확인과 결과 저장을 같은 트랜잭션에 넣어 발행과 회�
 
 ## 개발 환경의 병렬 실행에서는 분석 시작 대기가 줄었다
 
-AWS 개발 환경에서는 실제 모델을 호출하는 별도 시험을 진행했다. 2026년 10월 4일 정기 실행의 동시 수 3과, 같은 날 수동 실행의 동시 수 37을 비교했다. **두 실행 모두 DB 연결 방식을 바꾼 뒤**이므로 이 결과를 연결 변경 전후의 속도 비교로 읽으면 안 된다.
+AWS 개발 환경에서는 실제 모델을 호출하는 [별도 시험](https://raw.githubusercontent.com/alphaeveryday/edge/91f92ee5aa33a1daa8d9b9222888c5e47b7b94ac/tests/loadtest/analysis-v2/README.md)을 진행했다. 2026년 10월 4일 정기 실행의 동시 수 3과, 같은 날 수동 실행의 동시 수 37을 비교했다. **두 실행 모두 DB 연결 방식을 바꾼 뒤**이므로 이 결과를 연결 변경 전후의 속도 비교로 읽으면 안 된다.
 
 | 측정 항목 | 동시 수 3, 정기 실행 | 동시 수 37, 수동 실행 |
 |---|---:|---:|
@@ -122,13 +122,3 @@ LLM 대기 중 연결을 반환하는 일은 `close()` 위치를 옮기는 것�
 로컬 시험은 연결을 점유한 시간의 합과 장애 이후 저장 동작을 확인했다. 개발 환경 시험은 실제 모델을 실행하며 동시 수를 늘렸을 때 시작 대기가 어떻게 달라지는지 보여줬다. 지표와 환경을 분리해야 어느 변경이 무엇을 개선했는지 설명할 수 있다.
 
 이 변경에서 남긴 기준은 DB 연결이 살아 있다는 사실과 결과를 발행해도 된다는 판단을 같은 것으로 취급하지 않는 것이다. 연결은 필요한 구간에서 사용하고, 발행 권한은 실행 기록과 트랜잭션으로 확인한다.
-
-## 참고 자료
-
-- [실행 구조 대안 검토와 로컬 실험: EDGE PR #1110](https://github.com/alphaeveryday/edge/pull/1110)
-- [연결 수명 변경과 발행 권한 검증: EDGE PR #1112](https://github.com/alphaeveryday/edge/pull/1112)
-- [개발 환경 실측 결과 기록](https://raw.githubusercontent.com/alphaeveryday/edge/91f92ee5aa33a1daa8d9b9222888c5e47b7b94ac/tests/loadtest/analysis-v2/README.md)
-- [개발 환경 동시 수 37 검증: EDGE PR #1124](https://github.com/alphaeveryday/edge/pull/1124)
-- [실험 뒤 동시 수 복원: EDGE PR #1125](https://github.com/alphaeveryday/edge/pull/1125)
-- [PostgreSQL 16: 행 잠금과 advisory lock](https://www.postgresql.org/docs/16/explicit-locking.html)
-- [Psycopg 3: 연결과 트랜잭션 사용](https://www.psycopg.org/psycopg3/docs/basic/usage.html)

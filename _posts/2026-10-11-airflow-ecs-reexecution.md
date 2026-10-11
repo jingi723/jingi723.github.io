@@ -73,7 +73,7 @@ _이전 작업의 종료를 모르는 보류와 결과만 모르는 보류는 �
 
 AWS 시험에서도 화면의 task 색상만 보지 않았다. ECS 태스크 수, 업무 시작 횟수, 원장의 시도와 최종 상태, 파티션 쓰기 기록을 함께 대조했다. 재접속한 것처럼 보여도 업무 컨테이너가 두 번 시작됐다면 다른 결과이기 때문이다.
 
-2026년 9월 30일의 복구·보류 시험에서 확인한 동작은 다음과 같다.
+2026년 9월 30일의 [복구·보류 시험](https://raw.githubusercontent.com/alphaeveryday/edge/91f92ee5aa33a1daa8d9b9222888c5e47b7b94ac/src/apps/cloud/airflow/README.md)에서 확인한 동작은 다음과 같다.
 
 | 시험 조건 | 실행에서 확인한 동작 | 확인한 결과 |
 |---|---|---|
@@ -94,7 +94,7 @@ AWS 시험에서도 화면의 task 색상만 보지 않았다. ECS 태스크 수
 
 ## 장중 수급은 10월 3일 Airflow 상시 운영으로 전환했다 {#cutover-result}
 
-격리 시험 뒤 실제 전환은 2026년 10월 3일 AWS 개발 환경에서 완료했다. 전환 PR #1105가 병합되면서 장중 수급의 실행 주체를 `AIRFLOW`로 바꾸고, 기존 Step Functions를 시작하던 스케줄 다섯 개를 비활성화했다. 이어 `edge_investor_intraday` DAG를 활성화했으며, 결과는 PR #1113에 남겼다.
+격리 시험 뒤 실제 전환은 2026년 10월 3일 AWS 개발 환경에서 완료했다. [전환 PR #1105](https://github.com/alphaeveryday/edge/pull/1105)가 병합되면서 장중 수급의 실행 주체를 `AIRFLOW`로 바꾸고, 기존 Step Functions를 시작하던 스케줄 다섯 개를 비활성화했다. 이어 `edge_investor_intraday` DAG를 활성화했으며, 결과는 PR #1113에 남겼다.
 
 전환 전에 원장의 실행 중 시도, 살아 있는 관련 ECS 태스크, 실행 중인 Step Functions와 Airflow run, 미해결 보류를 확인했다. 두 실행 주체가 같은 작업을 맡는 순간을 만들지 않기 위한 절차였다. Step Functions 상태 머신 자체는 롤백을 위해 남겼다.
 
@@ -118,7 +118,7 @@ AWS 시험에서도 화면의 task 색상만 보지 않았다. ECS 태스크 수
 
 이 옵션은 워커가 실제로 `on_kill()`을 호출하는 경로에 적용된다. 워커가 갑자기 사라져 콜백을 실행하지 못한 경우까지 정리를 보장하지 않으며, 비동기 대기로 넘긴 뒤의 취소 동작 전체를 바꾸는 것도 아니다. 계속 실행하도록 남겨 둔 ECS 작업은 별도로 관측하고 정리해야 한다.
 
-PR #74129는 **2026년 10월 11일 확인 기준 리뷰 승인을 받은 열린 PR이며, 아직 병합되지 않았다.** AI 공동 작성 사실은 PR에 명시했다. upstream 검증은 실제 AWS 리소스를 사용하지 않았고, 응답을 대체한 테스트와 로컬 실행 검증이었다.
+[PR #74129](https://github.com/apache/airflow/pull/74129)는 **2026년 10월 11일 확인 기준 리뷰 승인을 받은 열린 PR이며, 아직 병합되지 않았다.** AI 공동 작성 사실은 PR에 명시했다. upstream 검증은 실제 AWS 리소스를 사용하지 않았고, 응답을 대체한 테스트와 로컬 실행 검증이었다.
 
 기여 범위도 종료 옵션에 한정된다. EDGE의 재접속, 업무 원장, 보류 해제, 중복 실행 방지 정책 전체를 Airflow에 추가한 것은 아니다. 프로젝트에서 선택한 정책 중 공통 operator에 둘 수 있는 작은 동작을 분리해 제안한 것이다.
 
@@ -129,14 +129,3 @@ Airflow 전환에서 먼저 정한 것은 재시도 횟수보다 다시 실행�
 이 선택은 자동 복구 일부와 수집 공백을 맞바꾼 결정이었다. 기존 작업자의 쓰기를 강제로 차단하는 구현이 없는 상태에서, 확인되지 않은 실행 옆에 새 업무를 계속 만들지 않도록 했다. 복구에는 종료 증거와 산출물 확인이 필요했다.
 
 장중 수급의 실제 전환까지 마친 뒤에도 Airflow의 상태와 업무 결과를 구분하는 원칙은 유지된다. task가 끝났다는 표시보다 어떤 업무가 시작됐고, 무엇을 썼으며, 어느 결과로 종료됐는지가 다음 실행의 근거다.
-
-## 참고 자료
-
-- [EDGE Airflow 실행 정책과 격리 검증·전환 기록](https://raw.githubusercontent.com/alphaeveryday/edge/91f92ee5aa33a1daa8d9b9222888c5e47b7b94ac/src/apps/cloud/airflow/README.md)
-- [상태 판정과 재접속 구현: EdgeStep](https://raw.githubusercontent.com/alphaeveryday/edge/91f92ee5aa33a1daa8d9b9222888c5e47b7b94ac/src/apps/cloud/airflow/dags/edge_batch.py)
-- [장중 수급 전환: EDGE PR #1105](https://github.com/alphaeveryday/edge/pull/1105), [실제 전환 결과: #1113](https://github.com/alphaeveryday/edge/pull/1113)
-- [원천 관측의 정기 실행 결측 판정: EDGE PR #1118](https://github.com/alphaeveryday/edge/pull/1118)
-- [운영 상태 문서 교정: EDGE PR #1148](https://github.com/alphaeveryday/edge/pull/1148)
-- [Amazon provider 9.36.0의 ECS operator 구현](https://raw.githubusercontent.com/apache/airflow/providers-amazon/9.36.0/providers/amazon/src/airflow/providers/amazon/aws/operators/ecs.py)
-- [AWS ECS RunTask API와 clientToken](https://docs.aws.amazon.com/AmazonECS/latest/APIReference/API_RunTask.html)
-- [ECS 종료 옵션 제안: Apache Airflow PR #74129](https://github.com/apache/airflow/pull/74129)

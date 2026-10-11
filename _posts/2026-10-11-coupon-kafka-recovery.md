@@ -6,11 +6,11 @@ tags: [kafka, mysql, idempotency, load-testing]
 permalink: /posts/coupon-kafka-recovery/
 ---
 
-선착순 쿠폰 발급 프로젝트에서 요청이 순간적으로 몰리자 DB 연결을 기다리는 요청이 쌓였다. 발급 수량의 정합성을 지키더라도, 사용자가 응답을 기다리는 시간까지 짧아지는 것은 아니었다. 폭주가 끝난 뒤 들어온 요청도 앞선 작업이 빠져나가기를 기다렸다.
+[선착순 쿠폰 발급 프로젝트](https://github.com/jingi723/coupon-system)에서 요청이 순간적으로 몰리자 DB 연결을 기다리는 요청이 쌓였다. 발급 수량의 정합성을 지키더라도, 사용자가 응답을 기다리는 시간까지 짧아지는 것은 아니었다. 폭주가 끝난 뒤 들어온 요청도 앞선 작업이 빠져나가기를 기다렸다.
 
 Kafka를 붙인 첫 경로에서는 신청 접수와 실제 발급을 나눴다. API는 신청을 Kafka에 기록한 뒤 접수를 알리고, Consumer가 DB에서 발급 여부를 판단했다. 이 구조에서 빠른 접수 응답만 확인하면, 중간에 멈춘 신청이 어떻게 처리되는지와 사용자가 최종 결과를 언제 아는지를 놓친다.
 
-개인 학습 프로젝트의 설계·코드 검토와 테스트·계측에는 AI 에이전트의 도움을 받았다. 아래의 구현과 수치는 2026년 10월 2~3일에 보존한 Kafka 직접 접수 경로와 로컬 시험 결과다. 이후 추가한 Redis 예약 구조와 구분해, 당시 어떤 신청을 받아 두었고 어디까지 복구됐는지 설명한다.
+당시에는 Redis 예약 없이 Kafka로 신청을 직접 접수했다. 이후 추가한 Redis 예약 구조는 이 글의 복구·성능 측정에 포함하지 않았다.
 
 ## 접수 성공과 쿠폰 발급 성공을 다른 응답으로 다뤘다 {#request-and-issue}
 
@@ -60,7 +60,7 @@ _DB 커밋 뒤 재전달된 요청은 저장된 결과를 사용해 중복 발�
 
 ## DB 커밋 뒤 JVM을 종료해 같은 레코드의 재전달을 확인했다 {#recovery-verification}
 
-복구 시험은 실제 Kafka 3.7.0과 MySQL 8.0 Testcontainers, 별도 애플리케이션 JVM을 사용했다. 메서드에 예외를 던지는 수준에서 끝내지 않고, DB에는 커밋됐지만 Kafka offset은 그대로인 지점을 확인한 뒤 프로세스를 강제로 종료했다. 기존 개발용 API나 브로커에 장애를 가한 시험은 아니다.
+2026년 10월 2일 로컬 복구 시험은 실제 Kafka 3.7.0과 MySQL 8.0 Testcontainers, 별도 애플리케이션 JVM을 사용했다. 메서드에 예외를 던지는 수준에서 끝내지 않고, DB에는 커밋됐지만 Kafka offset은 그대로인 지점을 확인한 뒤 프로세스를 강제로 종료했다. 기존 개발용 API나 브로커에 장애를 가한 시험은 아니다.
 
 테스트 전용 프록시는 DB 트랜잭션 서비스가 반환한 뒤, Consumer가 Kafka 컨테이너에 반환하기 전에 리스너 스레드를 멈춰 세웠다. 활성 트랜잭션이 없다는 표식만 믿지 않고, 별도 JDBC 연결에서도 발급 수량·이력·처리 결과가 각각 한 건씩 보이는지 확인했다. 다른 연결에서 조회된 기록으로 커밋 완료를 대조한 것이다.
 
@@ -94,7 +94,7 @@ DB 오류 시험에서는 특정 요청의 결과 저장을 거절하는 `CHECK`
 
 ## 접수는 빨라졌지만 최종 결과를 확인하는 시간은 늘었다 {#latency-results}
 
-폭주 비교에서는 접수 지연과 최종 결과 지연을 따로 측정했다. 접수 지연은 HTTP 호출 직전부터 202를 받기까지이고, 최종 결과 지연은 같은 전송 시각부터 별도 JDBC 조회에서 커밋된 결과를 처음 읽기까지다. 엔티티의 `processed_at`을 DB 커밋 순간으로 사용하지 않았다.
+10월 3일 로컬 폭주 비교에서는 접수 지연과 최종 결과 지연을 따로 측정했다. 접수 지연은 HTTP 호출 직전부터 202를 받기까지이고, 최종 결과 지연은 같은 전송 시각부터 별도 JDBC 조회에서 커밋된 결과를 처음 읽기까지다. 엔티티의 `processed_at`을 DB 커밋 순간으로 사용하지 않았다.
 
 3초 폭주 시험의 목표 부하는 초당 100건으로 20초, 초당 1,200건으로 3초, 다시 초당 100건으로 30초였다. 실제 전송 시각에는 부하 발생기의 편차가 있어 아래 차트와 표는 공통 시작점의 예정 경계로 요청을 나눴다. Kafka 경로의 실제 전송·접수는 8,617건이었다. 클라이언트 시간 제한은 60초이고 재시도는 하지 않았다.
 
@@ -156,13 +156,4 @@ Kafka를 붙인 뒤 가장 먼저 달라진 것은 발급 속도보다 접수의
 
 DB 커밋과 offset 커밋 사이의 종료는 같은 레코드의 재전달로 이어졌다. 그때 기존 DB 결과를 재사용하는 처리와 수량·이력·결과의 단일 트랜잭션이 추가 발급을 막았다. DB 오류 뒤의 재개에는 여전히 운영자의 원인 제거와 수동 조작이 필요했다.
 
-빠른 접수와 빠른 최종 처리는 각각 측정해야 했다. 복구 시험으로 중단된 신청의 처리 결과를 확인하고, 지연과 Consumer 비용 측정으로 최종 발급을 늦추는 구간을 좁혔다. 이후의 Redis 예약 작업도 이 시험과 별도로 검증할 변경이며, 당시 Kafka 경로의 결과에 소급해 포함하지 않는다.
-
-## 참고 자료
-
-- [쿠폰 발급 프로젝트](https://github.com/jingi723/coupon-system)
-- [Spring Kafka 3.3: 리스너 컨테이너의 offset 커밋](https://docs.spring.io/spring-kafka/reference/3.3/kafka/receiving-messages/message-listener-container.html)
-- [Spring Kafka 3.3.15: 리스너 컨테이너 구현](https://raw.githubusercontent.com/spring-projects/spring-kafka/v3.3.15/spring-kafka/src/main/java/org/springframework/kafka/listener/KafkaMessageListenerContainer.java)
-- [Kafka 3.7: KafkaConsumer와 offset 관리](https://kafka.apache.org/37/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html)
-
-프로젝트 수치는 로컬에 보존한 `2026-10-02-kafka-recovery`, `2026-10-03-kafka-burst-recovery-run3`, `2026-10-03-overload-comparison`, `2026-10-03-consumer-cost` 결과와 당시 소스 사본을 기준으로 했다. 현재 저장소의 Redis 예약 경로와는 다르다.
+빠른 접수와 빠른 최종 처리는 각각 측정해야 했다. 복구 시험으로 중단된 신청의 처리 결과를 확인하고, 지연과 Consumer 비용 측정으로 최종 발급을 늦추는 구간을 좁혔다.
