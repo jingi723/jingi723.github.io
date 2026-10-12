@@ -4,6 +4,8 @@ date: 2026-10-11 21:09:42 +0900
 categories: [data-pipeline, 신뢰성]
 tags: [airflow, ecs, orchestration, recovery]
 permalink: /posts/airflow-ecs-reexecution/
+image:
+  path: /assets/img/posts/airflow-ecs-reexecution/thumbnail.webp
 ---
 
 EDGE에서는 수집·정제·적재로 끝나는 배치의 오케스트레이션을 작업군별로 Airflow로 옮기기 시작했다. 첫 전환 대상은 AWS 개발 환경의 장중 수급 배치였다. 업무 코드는 기존 ECS 컨테이너를 사용하고, 그 작업의 실행 순서와 결과를 관리하는 주체를 바꿨다.

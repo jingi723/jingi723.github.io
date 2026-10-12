@@ -4,6 +4,8 @@ date: 2026-10-11 21:09:42 +0900
 categories: [백엔드, 동시성]
 tags: [kafka, mysql, idempotency, load-testing]
 permalink: /posts/coupon-kafka-recovery/
+image:
+  path: /assets/img/posts/coupon-kafka-recovery/thumbnail.webp
 ---
 
 [선착순 쿠폰 발급 프로젝트](https://github.com/jingi723/coupon-system)에서 요청이 순간적으로 몰리자 DB 연결을 기다리는 요청이 쌓였다. 발급 수량의 정합성을 지키더라도, 사용자가 응답을 기다리는 시간까지 짧아지는 것은 아니었다. 폭주가 끝난 뒤 들어온 요청도 앞선 작업이 빠져나가기를 기다렸다.

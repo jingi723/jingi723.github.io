@@ -4,6 +4,8 @@ date: 2026-10-11 21:09:42 +0900
 categories: [data-pipeline, 신뢰성]
 tags: [postgresql, llm, concurrency, step-functions]
 permalink: /posts/edge-llm-db-connections/
+image:
+  path: /assets/img/posts/edge-llm-db-connections/thumbnail.webp
 ---
 
 EDGE의 ETF 분석은 원천 자료를 읽고 LLM을 호출한 뒤, 분석 결과와 그 근거를 PostgreSQL에 저장한다. 전망 결과를 오전 8시까지 준비하려고 병렬 실행을 검토하던 중, 분석 한 건이 LLM 응답을 기다리는 동안에도 쓰기용 DB 연결 세 개를 유지한다는 제약이 드러났다.
