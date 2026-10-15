@@ -70,7 +70,7 @@ rollback이면 아예 없고, 지연이면 나중엔 생기지만 지금은 없�
 
 그때 받아들였다. 이건 처리 순서의 문제가 아니라, 애초에 두 write가 하나로 묶이지 않는다는 구조 문제였다.
 
-![commit→send와 send→commit 두 순서가 각각 어느 지점에서 유실·불일치를 내는지 나란히 놓은 대비도](/assets/img/posts/edge-outbox/two-write-orders-both-break.webp)
+![commit→send와 send→commit 두 순서가 각각 어느 지점에서 유실·불일치를 내는지 나란히 놓은 대비도](/assets/img/posts/edge-outbox/two-write-orders-both-break.webp){: width="1672" height="941" }
 _DB를 먼저 해도 SQS를 먼저 해도, 불일치는 반대쪽으로 옮겨갈 뿐 사라지지 않는다._
 
 ## 작업과 발행 의도를 한 트랜잭션에 함께 저장하고, 발행은 Relay에만 맡겼다
@@ -116,7 +116,7 @@ event가 `NEW`로 DB에 남아 있으니 다음 Relay tick이 다시 집어 발�
 
 그 밖의 업무 로직은 Relay에 두지 않았다. 무엇을 실행할지는 consumer와 DB가 맡고, Relay는 `NEW` event를 올바른 큐로 밀어 넣는 얇은 층으로 남겼다.
 
-![왼쪽은 DB와 SQS로 갈라진 두 write와 그 사이 유실 구간, 오른쪽은 job과 outbox event를 담은 한 PostgreSQL 트랜잭션과 그 밖의 Relay 발행 경로](/assets/img/posts/edge-outbox/dual-write-vs-outbox.webp)
+![왼쪽은 DB와 SQS로 갈라진 두 write와 그 사이 유실 구간, 오른쪽은 job과 outbox event를 담은 한 PostgreSQL 트랜잭션과 그 밖의 Relay 발행 경로](/assets/img/posts/edge-outbox/dual-write-vs-outbox.webp){: width="1536" height="1024" }
 _두 개의 독립 write를 한 트랜잭션 안 job+outbox로 묶고, 발행은 commit 밖 Relay 하나에만 맡긴다._
 
 ### 중복 수신 — DB 상태를 확인해 실행 자격을 얻는다
@@ -139,7 +139,7 @@ _두 개의 독립 write를 한 트랜잭션 안 job+outbox로 묶고, 발행은
 
 handler가 끝나면 결과에 따라 상태를 하나로 확정했다. 일시 실패일 때만 `next_attempt_at`을 새로 적고, 그 시각에 맞춰 메시지 visibility도 같이 조정했다.
 
-![메시지 수신부터 DB 상태 확인, CAS CLAIMED, handler 실행, 결과별 SUCCEEDED·RETRY_WAIT·DEAD 전이까지의 분기 흐름도](/assets/img/posts/edge-outbox/idempotent-consumer-flow.webp)
+![메시지 수신부터 DB 상태 확인, CAS CLAIMED, handler 실행, 결과별 SUCCEEDED·RETRY_WAIT·DEAD 전이까지의 분기 흐름도](/assets/img/posts/edge-outbox/idempotent-consumer-flow.webp){: width="1536" height="1024" }
 _실행 자격은 메시지가 아니라 DB CAS가 정하고, 이미 끝난 작업은 실행 없이 지운다._
 
 ## 장애 주입으로 발행 복구와 중복 처리 동작을 확인했다 {#fault-injection-results}
@@ -173,7 +173,7 @@ uv run --project src/apps/cloud/data-pipeline python measure_edge_outbox.py --re
 | job+outbox commit 직후 종료 후 Relay 재개 | 100 | 100 | 100 | 100 | - | 메시지 누락 0건 |
 | 같은 event를 두 번씩 전달 | 200 deliveries | 100 | 100 | 100 | 100 | 중복 업무 실행 0건 |
 
-![직접 방식 baseline과 Outbox 경로의 유실·중복 실행 수치를 나란히 비교한 대비 인포그래픽](/assets/img/posts/edge-outbox/fault-injection-100-vs-0.webp)
+![직접 방식 baseline과 Outbox 경로의 유실·중복 실행 수치를 나란히 비교한 대비 인포그래픽](/assets/img/posts/edge-outbox/fault-injection-100-vs-0.webp){: width="1536" height="1024" }
 _직접 발행은 100번 죽여 100건을 잃지만, Outbox는 같은 100번에 유실도 중복 실행도 0이다._
 
 첫 줄이 직접 발행 방식의 baseline이다. commit 후 send 전에서 100번 죽였더니 DB에는 job 100건이 남았는데, 이를 깨울 메시지는 0건이었다.
@@ -211,6 +211,14 @@ _직접 발행은 100번 죽여 100건을 잃지만, Outbox는 같은 100번에 
 
 다시 이 조건이 깨지면 운영보다 테스트가 먼저 울게 만들고 싶었다.
 
+## AWS 개발 환경에서의 발행 재개 {#aws-relay-recovery}
+
+로컬에서 종료 지점을 고정한 실험과 별도로, AWS 개발 환경에서도 Relay가 종료된 동안 이벤트가 Outbox에 쌓인 사례가 있었다. 2026년 8월 4일에 대기하던 이벤트 **325건이 발행 재개 후 모두 `PUBLISHED`로 기록됐고, 최장 대기는 약 30분(1,798초)**이었다. Relay가 멈춰 있어도 발행할 작업은 DB에 남아 있었다.
+
+이 수치는 8월 29일 원장 조회와 9월 7일 읽기 전용 스냅샷으로 대조했다. 325건은 01:53 UTC에 발행된 353건 중, 기록된 생성 시각부터 발행까지 60초 넘게 걸린 이벤트다. 한 시각에 325건이 함께 생성된 것이 아니라, Relay가 종료된 동안 계속 쌓인 이벤트가 발행 재개 후 처리된 것이다.
+
+Relay가 종료됐다는 사실은 확인했지만, 구체적인 종료 원인은 이 기록으로 특정하지 못했다. 여기서 확인한 완료 지점은 **메시지 발행**이며, 325건의 후속 분석까지 모두 끝났다는 결과는 아니다. 로컬 실험은 정해진 종료 지점에서의 복구 동작을, AWS 사례는 실제 개발 환경에 남은 이벤트가 발행 재개 후 처리됐다는 것을 각각 뒷받침한다.
+
 ## 발행 대상을 destination별로 나눠 장애 영향을 제한했다
 
 Relay가 `NEW` event를 batch로 집어 발행할 때, 처음에는 오래된 것부터 전역으로 집으면 된다고 생각했다. 그런데 destination이 셋, 즉 뉴스·가격·설명으로 갈라지자 그 단순함이 바로 함정으로 보였다.
@@ -225,7 +233,7 @@ Relay가 `NEW` event를 batch로 집어 발행할 때, 처음에는 오래된 �
 
 그래서 `claim_outbox_batch`는 전역이 아니라 destination별로 claim하게 바꿨다. 장애 레인의 적체가 정상 레인의 batch 자리를 먹지 못하게 레인을 아예 격리했다.
 
-![전역 FIFO claim에서 장애 레인이 batch를 독점하는 모습과, destination별 claim에서 세 레인이 각각 batch 자리를 얻는 모습의 대비](/assets/img/posts/edge-outbox/global-vs-per-destination-claim.webp)
+![전역 FIFO claim에서 장애 레인이 batch를 독점하는 모습과, destination별 claim에서 세 레인이 각각 batch 자리를 얻는 모습의 대비](/assets/img/posts/edge-outbox/global-vs-per-destination-claim.webp){: width="1536" height="1024" }
 _전역으로 오래된 것부터 집으면 장애 레인이 매 batch를 먹지만, destination별로 집으면 정상 레인이 굶지 않는다._
 
 ### 일시 실패 — next_attempt_at에 다음 발행 시각을 기록한다
@@ -295,15 +303,11 @@ WHERE job_id = ? AND claimed_by = ? AND status = 'CLAIMED'
 
 DLQ 도착 처리도 CAS로 잠갔다. `dead_on_dlq`는 DB가 non-terminal일 때만 DEAD로 바꾸고, 살아 있는 lease의 CLAIMED는 건드리지 않았다.
 
-## 실제 SQS 검증과 S3 산출물 회수는 남아 있다
+## 검증 범위와 S3 산출물 회수 {#실제-sqs-검증과-s3-산출물-회수는-남아-있다}
 
-여기까지 밀어붙이고도, 아직 선을 못 그은 경계가 남아 있었다. 그건 덮지 않고 그대로 적어두는 편이 맞았다.
+로컬의 100회 반복 실험에서는 SQS 전송과 큐를 테스트용 코드로 대체했다. 따라서 그 실험의 유실·중복 수치는 실제 SQS를 포함한 장애 재현 결과가 아니다. 별도 AWS 사례에서는 발행 기록을 확인했으며, 로컬 실험과 AWS 사례 모두 각자 확인한 완료 지점까지 해석해야 한다.
 
-첫째, Relay publisher는 deterministic fake로 검증했다. 실제 AWS SQS를 포함한 end-to-end 검증은 아직 하지 않았다.
-
-측정에서 확인한 유실 0은 지정한 장애 주입 조건에서 Relay가 publisher 경계까지 event를 전달하고 `PUBLISHED`로 확정한 결과다. 그 너머 실제 큐 왕복까지 확인한 건 아니다.
-
-둘째, S3와 PostgreSQL은 하나의 transaction이 아니다. Price Worker는 immutable S3 artifact를 먼저 쓰고, 그다음 PG transaction을 commit한다.
+S3와 PostgreSQL도 하나의 transaction이 아니다. Price Worker는 immutable S3 artifact를 먼저 쓰고, 그다음 PG transaction을 commit한다.
 
 artifact가 먼저 durable하게 박혀야 DB가 그걸 가리킬 수 있어서 순서가 이렇게 정해졌다. 하지만 바로 그 사이에서 죽으면 artifact만 남고 job은 안 남는 orphan artifact가 생겼다.
 

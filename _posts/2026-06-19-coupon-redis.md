@@ -45,7 +45,7 @@ k6 Before 실측에서 이게 그대로 나왔다. 재고 100개짜리 시나리
 
 거절 요청마다 DB에서 잔여 수량을 판정하는 비용이 들었다. 발급이 끝난 뒤에도 이어지는 이 쓰기 시도를 줄일 필요가 있었다.
 
-![왼쪽의 100건 성공 트리클과 100,157건 거절 홍수가 같은 MySQL 실린더로 합류하는 그림](/assets/img/posts/coupon-redis/before-reject-flood.png)
+![왼쪽의 100건 성공 트리클과 100,157건 거절 홍수가 같은 MySQL 실린더로 합류하는 그림](/assets/img/posts/coupon-redis/before-reject-flood.png){: width="1200" height="800" }
 _발급은 100건에서 끝났는데, 거절 10만여 건이 전부 같은 DB 트랜잭션을 한 번씩 두드린다_
 
 ## 비관적 락은 구현해봤지만 발급 경로엔 올리지 않았다
@@ -101,7 +101,7 @@ return 1
 
 판정은 Redis의 원자적 실행에 맡기고, 거절 요청은 이후 DB 쓰기 단계로 보내지 않았다. Redis에서도 스크립트 실행은 직렬화되므로 대기 자체가 없어진다는 뜻은 아니다.
 
-![네 단계(SISMEMBER·GET·DECR·SADD)를 감싼 원자 박스에서 -1/-2/1 세 출구가 갈라져 성공만 MySQL로 가는 그림](/assets/img/posts/coupon-redis/lua-atomic-three-exits.png)
+![네 단계(SISMEMBER·GET·DECR·SADD)를 감싼 원자 박스에서 -1/-2/1 세 출구가 갈라져 성공만 MySQL로 가는 그림](/assets/img/posts/coupon-redis/lua-atomic-three-exits.png){: width="1200" height="800" }
 _네 명령이 한 원자 블록 안에서 돌고, 세 갈래 중 성공만 DB로 내려간다_
 
 ### 반환값 세 갈래 — 성공만 DB로 내려보낸다
@@ -135,7 +135,7 @@ rollback을 발급 흐름 어디에서 부르는지가 나머지 절반이다. `
 
 그래서 rollback을 부르는 지점도 이 DB 단계다. 조건부 UPDATE가 0행을 갱신해 `updated == 0`으로 떨어지면 rollback 후 CouponExhaustedException을 던지고, 저장 중 예외가 잡히면 `catch`에서 rollback한 뒤 예외를 다시 올린다. Redis에서 성공으로 판정했어도 DB 단계가 실패하면 이 보상 처리를 시도한다. 다만 SREM과 INCR은 별도 호출이므로 두 호출 사이의 종료나 보상 자체의 실패까지 원자적으로 복구하는 코드는 아니다.
 
-![Redis·MySQL 두 레인에서 DB 저장 실패 후 SREM→조건부 INCR로 재고를 되돌리는 흐름도](/assets/img/posts/coupon-redis/dual-write-rollback.png)
+![Redis·MySQL 두 레인에서 DB 저장 실패 후 SREM→조건부 INCR로 재고를 되돌리는 흐름도](/assets/img/posts/coupon-redis/dual-write-rollback.png){: width="1200" height="800" }
 _Redis가 먼저 깎은 재고를, DB 저장이 실패하면 제거에 성공했을 때만 되돌린다_
 
 ## 정합성은 재설계 후에도 그대로였다
@@ -201,7 +201,7 @@ p50과 p95는 응답 시간의 분포를 보는 값이다. p50은 요청의 절�
 
 불필요한 UPDATE 시도를 줄이면 다른 DB 작업과 경쟁하는 부담도 줄일 수 있다. 이번 실험에서 직접 확인한 범위는 거절 요청의 발급 UPDATE·이력 저장 진입이 0건이 됐다는 점이다.
 
-![거절 행선지 막대 — Before MySQL 100,157, After MySQL 0·Redis 154,378](/assets/img/posts/coupon-redis/reject-destination-before-after.png)
+![거절 행선지 막대 — Before MySQL 100,157, After MySQL 0·Redis 154,378](/assets/img/posts/coupon-redis/reject-destination-before-after.png){: width="1200" height="800" }
 _Before의 거절은 발급 UPDATE를 시도하고, After의 거절은 Redis에서 끝나 이후 DB 쓰기 진입이 0이 된다_
 
 ## 이 숫자는 로컬 단일 호스트에서 나왔다
